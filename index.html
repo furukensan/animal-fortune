@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>守護動物占い</title>
+
+<!-- ★ Google AdSense 本体スクリプト（必須）★ -->
+<script async 
+  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1112746150187285"
+  crossorigin="anonymous"></script>
+
+<style>
+  * {box-sizing:border-box}
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Kaku Gothic ProN","Segoe UI",Arial,sans-serif;
+    margin:0; padding:20px;
+    background:#0f1724; color:#e6eef8;
+  }
+  .wrap{
+    max-width:900px;margin:0 auto;
+    background:linear-gradient(180deg,#081028,#0c1530);
+    padding:20px;border-radius:14px;
+    box-shadow:0 10px 30px rgba(2,6,23,.7)
+  }
+  h1{font-size:22px;margin-bottom:10px;color:#fff;text-align:center}
+  p.lead{text-align:center;opacity:.85;margin-bottom:20px}
+
+  .question{
+    background:rgba(255,255,255,0.05);padding:14px;
+    border-radius:10px;margin-bottom:14px;
+    border:1px solid rgba(255,255,255,0.06)
+  }
+  .q-title{font-weight:700;margin-bottom:10px;font-size:15px}
+  .choices{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:600px){.choices{grid-template-columns:repeat(2,1fr)}}
+  .choice{
+    background:rgba(255,255,255,0.03);padding:10px 12px;
+    border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+    cursor:pointer
+  }
+  .choice:hover{
+    transform:translateY(-3px);
+    box-shadow:0 6px 16px rgba(2,6,23,.6)
+  }
+
+  .controls{
+    display:flex;gap:10px;margin:16px 0;
+    flex-wrap:wrap;justify-content:center
+  }
+  .btn{
+    background:#1f6feb;color:#fff;
+    padding:10px 16px;border-radius:8px;
+    border:none;cursor:pointer;font-size:14px
+  }
+  .btn.secondary{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.3)
+  }
+
+  /* 結果画面 */
+  #resultView{display:none;margin-top:10px}
+  .result-card{
+    width:100%;max-width:360px;margin:0 auto 16px;
+    background:linear-gradient(180deg,#091229,#12203a);
+    border-radius:12px;border:6px solid rgba(255,255,255,0.05);
+    box-shadow:0 20px 50px rgba(2,6,23,.8);
+    padding:16px;
+  }
+  .result-card img{
+    width:100%;border-radius:10px;margin-bottom:12px;
+    display:block;
+  }
+  .result-title{
+    font-size:18px;font-weight:800;margin-bottom:4px;text-align:center;
+  }
+  .result-subtitle{
+    font-size:13px;opacity:.85;margin-bottom:10px;text-align:center;
+  }
+  .result-desc{
+    font-size:14px;background:rgba(255,255,255,0.05);
+    padding:12px;border-radius:8px;margin-bottom:10px;
+  }
+
+  .relation-good, .relation-bad{
+    margin-top:8px;
+    padding:10px;
+    border-radius:6px;
+    font-size:13px;
+  }
+  .relation-good{
+    background:rgba(0,255,140,0.08);
+    border-left:4px solid #00ff8c;
+  }
+  .relation-bad{
+    background:rgba(255,30,0,0.08);
+    border-left:4px solid #ff4d4d;
+  }
+
+  footer{text-align:center;font-size:12px;margin-top:20px;opacity:.7}
+</style>
+</head>
+
+
+<body>
+<div class="wrap">
+
+  <h1>守護動物占い</h1>
+  <p class="lead">10問で「あなたの守護動物」を診断します。</p>
+
+  <!-- ====================== 質問画面 ====================== -->
+  <div id="quizView">
+    <div id="quiz"></div>
+
+    <div class="controls">
+      <button id="btnSubmit" class="btn">診断する</button>
+      <button id="btnReset" class="btn secondary">最初からやり直す</button>
+    </div>
+
+    <!-- ▼▼ スマホ最適インフィード広告（11111112） ▼▼ -->
+    <div style="margin:20px 0;">
+      <ins class="adsbygoogle"
+          style="display:block"
+          data-ad-format="fluid"
+          data-ad-layout="in-feed"
+          data-ad-layout-key="-fg+5n+6t-e7+1u"
+          data-ad-client="ca-pub-1112746150187285"
+          data-ad-slot="11111112"
+          data-full-width-responsive="true"
+          data-adtest="on"></ins>
+      <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+    <!-- ▲▲ インフィード広告 ▲▲ -->
+
+  </div>
+
+
+
+  <!-- ====================== 結果画面 ====================== -->
+  <div id="resultView">
+    <h2 style="text-align:center;margin-top:0;">診断結果</h2>
+
+    <div class="result-card">
+      <img id="cardImage" src="" alt="Tarot Image">
+      <div class="result-title" id="cardTitle"></div>
+      <div class="result-subtitle" id="cardSubtitle"></div>
+      <div class="result-desc" id="cardDesc"></div>
+      <div id="goodReason" class="relation-good"></div>
+      <div id="badReason" class="relation-bad"></div>
+    </div>
+
+    <div class="controls">
+      <button id="btnDownload" class="btn">結果カード画像をダウンロード</button>
+      <button id="btnAgain" class="btn secondary">もう一度診断する</button>
+    </div>
+
+    <p style="font-size:12px;opacity:.8;text-align:center;margin-top:4px;">
+      ※画像だけを保存してSNSなどで自由にシェアしてください。
+    </p>
+  </div>
+
+
+  <footer>※この診断はエンタメ目的です</footer>
+</div>
+
+
+<script>
+/* ========= 動物データ（グループを 3・3・2・3・3 に調整） ========= */
+const animals = [
+  {
+    key:'kuma', tarot:'STRENGTH', name:'BEAR',
+    img:'/img/BEAR.png',
+    desc:'あなたは周囲の人に「安心」を与える存在。柔らかな雰囲気と大きな心の器を持ち、人の本音を穏やかに受け止める力に優れています。あなたが側にいるだけで空気が和らぎ、相手の心が解けていきます。感情に振り回されず落ち着いた判断ができるあなたは、内なる強さを象徴する存在です。',
+    advice:'恋愛では深い愛情を注ぎますが、尽くしすぎて自分を後回しにしがち。あなた自身の気持ちも同じように大切にしてください。「求めてもいい」という許可を自分に与えることで、関係はより健全に育ちます。',
+    group:'Affection' // ← Affection（2）
+  },
+
+  {
+    key:'shironeko', tarot:'THE HIGH PRIESTESS', name:'CAT',
+    img:'/img/CAT.png',
+    desc:'あなたは静かな空気を纏いながらも、どこか掴みきれない魅力を持つ存在。繊細で美しい感性を持ち、状況や人の感情を深く読み取る力に優れています。控えめながらも存在感があり「もっと知りたい」と思われるタイプ。直感が鋭く、相手の本心にもすぐ気づく洞察力の持ち主です。',
+    advice:'慎重になりすぎてチャンスを逃してしまうことも。恋愛では心を開くのに時間がかかりますが、信頼すると深く愛します。直感が「良い」と言っている相手には、一歩だけ踏み出す勇気を持つと恋が始まります。',
+    group:'Intuition' // ← Intuition（3）
+  },
+
+  {
+    key:'kojika', tarot:'THE LOVERS', name:'FAWN',
+    img:'/img/FAWN.png',
+    desc:'あなたは無邪気で愛らしく、人の心を自然に癒す存在。相手の感情に敏感で直感的に空気を読む力があります。甘え上手で守ってあげたくなる雰囲気を持ち、人から深く愛されやすいタイプです。ただし、寂しさを感じると相手に依存してしまう一面もあります。',
+    advice:'恋では情熱的で相手を喜ばせたい気持ちが強いあなた。与えるだけになると苦しくなるので、ひとり時間を大切にして心を整えることが大事。自分を満たすことで、恋はもっと優しく幸せに育ちます。',
+    group:'Change' // ← Change（3）
+  },
+
+  {
+    key:'karasu', tarot:'DEATH', name:'CROW',
+    img:'/img/CROW.png',
+    desc:'あなたは「変化」の象徴。過去にしがみつかず、新しい世界へと大胆に進む強さを持っています。停滞を嫌い、常に成長と刺激を求め続ける意識の高いタイプです。その行動力と決断力は周囲から尊敬されます。',
+    advice:'恋愛では情熱的で直感型。ただ、突然距離を置いてしまう癖があり相手が不安になることも。あなたの魅力を最大限に活かすためには「気持ちの変化を言葉で伝える」ことが重要です。それだけで恋は驚くほど安定します。',
+    group:'Change'
+  },
+
+  {
+    key:'kaeru', tarot:'THE STAR', name:'FROG',
+    img:'/img/FLOG.png',
+    desc:'あなたは高い適応力と柔軟性を持ち、どんな環境でも前向きに生きられるタイプです。落ち込んでもすぐに立ち直り、周囲の人に希望を与える明るい存在。あなたがいるだけで場の空気が楽しく軽やかになります。',
+    advice:'恋では夢見がちでロマンチック。ただし勢いが強すぎて現実とのギャップで疲れてしまうこともあります。相手のペースと自分の理想のバランスを取ることで、恋が穏やかに美しく進みます。',
+    group:'Adventure' // ← Adventure（3）
+  },
+
+  {
+    key:'kitsune', tarot:'THE FOOL', name:'FOX',
+    img:'/img/FOX.png',
+    desc:'自由と冒険を愛するあなたは、どこにいても光る存在。好奇心旺盛で、常に新しい刺激を求めるエネルギッシュなタイプです。枠に収まらないあなたの発想は周囲を魅了し、自由な魅力で人を惹きつけます。',
+    advice:'恋愛では直感で恋に落ちるスピードが早いですが、深い話が後回しになることも。気持ちを素直に言葉にするだけで関係の安定度が上がり、長続きする恋へと変わっていきます。',
+    group:'Adventure'
+  },
+
+  {
+    key:'taka', tarot:'JUSTICE', name:'HAWK',
+    img:'/img/HAWK.png',
+    desc:'あなたは論理的で公平さを大切にするタイプ。好き嫌いではなく「正しいかどうか」で判断できる知的な人物です。その誠実さは周囲から強い信頼を集めます。冷静かつ客観的な視点を持つ、精神的に成熟したタイプです。',
+    advice:'恋では真面目で誠実ですが、厳しさが出すぎると相手が試されているように感じてしまうことがあります。少し柔らかい言い方を意識するだけで恋が非常にスムーズになります。',
+    group:'Logic' // ← Logic（3）
+  },
+
+  {
+    key:'lion', tarot:'THE EMPEROR', name:'LION',
+    img:'/img/Lion.png',
+    desc:'堂々とした存在感とリーダー気質を兼ね備えたあなた。責任感が強く、頼られると全身全霊で応えます。情熱的なエネルギーを持ち、行動力と意志の強さは周囲に大きな影響を与えます。',
+    advice:'恋愛では一途で情熱的。ただし自分のペースを押し付けてしまうことが弱点。相手の意見や感覚を尊重する姿勢が、愛を長く深いものにします。',
+    group:'Change'
+  },
+
+  {
+    key:'fukuro', tarot:'THE MAGICIAN', name:'OWL',
+    img:'/img/OWL.png',
+    desc:'知的で観察力が高く、どんな状況にも柔軟に対応できる器用なタイプ。人をよく見て最適な距離感を取ることができるので、周囲から「話しやすい」と思われやすい存在です。',
+    advice:'恋では慎重で、完璧に振る舞おうとしてしまうことがあります。少しだけ弱さや本音を見せると、相手との距離が一気に縮まっていきます。',
+    group:'Intuition'
+  },
+
+  {
+    key:'panda', tarot:'WHEEL OF FORTUNE', name:'PANDA',
+    img:'/img/PANDA.png',
+    desc:'あなたは自然と幸運を引き寄せる「ラッキー体質」。肩の力が抜けていて、いつの間にか良い出来事が巡ってきます。その明るく柔らかい雰囲気は人に安心感を与え、周囲を優しく包み込みます。',
+    advice:'流れに任せすぎると相手のペースに振り回されがち。自分の意思を言葉にするだけで、恋が安定し、より良い方向へ進みます。',
+    group:'Logic'
+  },
+
+  {
+    key:'usagi', tarot:'THE EMPRESS', name:'RABBIT',
+    img:'/img/RABBIT.png',
+    desc:'優しく温かく、人を包み込む母性的な魅力があります。「癒しの存在」として周囲から愛されやすいタイプ。相手を喜ばせることが得意で、思いやりにあふれています。',
+    advice:'尽くしすぎる傾向があるため、時には「やってほしいこと」を相手に伝えることも大切。与えるだけでなく、受け取ることで恋はもっと健やかに育ちます。',
+    group:'Adventure'
+  },
+
+  {
+    key:'namakemono', tarot:'THE HANGED MAN', name:'SLOTH',
+    img:'/img/SLOTH.png',
+    desc:'穏やかで争いを好まないあなたは、人の気持ちを優先しがちな平和主義者。その優しさは多くの人を癒しますが、我慢しすぎてしまうこともあります。',
+    advice:'恋では受け身になりやすいため、時には「NO」と言う勇気が必要。境界線を守ることで、恋はより健全で心地よいものになります。',
+    group:'Affection'
+  },
+
+  {
+    key:'kounotori', tarot:'THE HIEROPHANT', name:'STORK',
+    img:'/img/STROK.png',
+    desc:'誠実で温かく、家庭的な魅力まで持つあなたは、周囲に安心と安定を提供する存在。落ち着いた雰囲気は多くの人を惹きつけ、長期的な関係を築くことが得意です。',
+    advice:'優しいがゆえに「都合よく扱われてしまう」ことも。言うべきことは優しく、しかしはっきり伝えることで、恋は健やかに育ちます。',
+    group:'Logic'
+  },
+
+  {
+    key:'kame', tarot:'THE HERMIT', name:'TURTLE',
+    img:'/img/TURTEL.png',
+    desc:'知的でマイペース。自分の世界観をしっかり持っているあなたは、一人の時間で心が満たされるタイプ。深く考え、深く愛せる精神的な落ち着きを持つ人物です。',
+    advice:'慎重なあまり距離を縮めるタイミングを逃しがち。あなたの誠実さは大きな魅力なので、気持ちを丁寧に言葉で伝えることだけ意識すれば、恋は自然と順調に進みます。',
+    group:'Intuition'
+  }
+];
+
+const groups = {
+  Adventure: animals.filter(a=>a.group==='Adventure'),
+  Intuition: animals.filter(a=>a.group==='Intuition'),
+  Affection: animals.filter(a=>a.group==='Affection'),
+  Logic: animals.filter(a=>a.group==='Logic'),
+  Change: animals.filter(a=>a.group==='Change')
+};
+
+/* ========= 相性データ ========= */
+const compatibility = {
+  Affection: {
+    good: 'Adventure',
+    bad: 'Logic'
+  },
+  Adventure: {
+    good: 'Change',
+    bad: 'Affection'
+  },
+  Change: {
+    good: 'Intuition',
+    bad: 'Adventure'
+  },
+  Intuition: {
+    good: 'Logic',
+    bad: 'Change'
+  },
+  Logic: {
+    good: 'Affection',
+    bad: 'Intuition'
+  }
+};
+
+
+function generateCompatibilityReason(groupA, groupB, isGood) {
+  const reasonsGood = {
+    Affection: {
+      Adventure: "あなたの優しさをAdventureタイプが楽しく受け止め、自然体でいられる関係です。",
+    },
+    Adventure: {
+      Change: "あなたの自由さとChangeタイプの情熱が良い刺激になり、お互いを成長させる関係です。",
+    },
+    Change: {
+      Intuition: "あなたの決断力をIntuitionタイプが深い理解で支え、精神的に強い絆が生まれます。",
+    },
+    Intuition: {
+      Logic: "あなたの繊細な感性をLogicタイプが安定感で包み、安心して寄り添える関係です。",
+    },
+    Logic: {
+      Affection: "あなたの誠実さをAffectionタイプが温かく受け止め、長続きしやすい関係です。",
+    }
+  };
+
+  const reasonsBad = {
+    Affection: {
+      Logic: "感情重視のあなたと理性重視のLogicタイプは、判断基準がズレやすい傾向があります。",
+    },
+    Adventure: {
+      Affection: "自由を大切にするあなたと、甘えたいAffectionタイプは、距離感が合わないことがあります。",
+    },
+    Change: {
+      Adventure: "変化を求めるあなたと自由奔放なAdventureタイプは、ペースが噛み合わず落ち着きにくい相性です。",
+    },
+    Intuition: {
+      Change: "繊細なあなたにとって、Changeタイプの勢いや波は刺激が強すぎることがあります。",
+    },
+    Logic: {
+      Intuition: "直感で動くIntuitionタイプに対し、あなたは合理性を重視するため価値観のズレが出やすいです。",
+    }
+  };
+
+  // 安全な fallback 対応
+  const goodText = reasonsGood[groupA]?.[groupB] 
+                  || "お互いの魅力を自然に引き出し合える良好な相性です。";
+
+  const badText  = reasonsBad[groupA]?.[groupB] 
+                  || "価値観の違いやペースのズレが出やすい相性です。";
+
+  return isGood ? goodText : badText;
+}
+
+
+/* ========= 質問 ========= */
+const questions = [
+  {q:"初対面で惹かれるポイントは？",choices:[
+    {t:'Adventure',text:'面白さ・個性'},
+    {t:'Intuition',text:'ミステリアスさ'},
+    {t:'Affection',text:'優しさ'},
+    {t:'Logic',text:'落ち着き'}]},
+
+  {q:"デートのスタイルは？",choices:[
+    {t:'Adventure',text:'行き当たりばったり'},
+    {t:'Affection',text:'相手に合わせる'},
+    {t:'Logic',text:'しっかり計画'},
+    {t:'Intuition',text:'雰囲気重視'}]},
+
+  {q:"恋に落ちるスピードは？",choices:[
+    {t:'Adventure',text:'直感で一瞬'},
+    {t:'Affection',text:'ゆっくり深まる'},
+    {t:'Logic',text:'慎重に見極める'},
+    {t:'Change',text:'急に盛り上がる'}]},
+
+  {q:"好きな人へのアプローチは？",choices:[
+    {t:'Change',text:'すぐ行動'},
+    {t:'Logic',text:'タイミング重視'},
+    {t:'Affection',text:'自然に距離を縮める'},
+    {t:'Adventure',text:'友達として仲良くする'}]},
+
+  {q:"恋人に求めるものは？",choices:[
+    {t:'Adventure',text:'楽しさ'},
+    {t:'Intuition',text:'心のつながり'},
+    {t:'Affection',text:'思いやり'},
+    {t:'Logic',text:'安心感'}]},
+
+  {q:"嫉妬の強さは？",choices:[
+    {t:'Logic',text:'ほぼしない'},
+    {t:'Affection',text:'少しする'},
+    {t:'Intuition',text:'突然不安になる'},
+    {t:'Change',text:'かなり強い'}]},
+
+  {q:"連絡頻度の理想は？",choices:[
+    {t:'Affection',text:'毎日たくさん'},
+    {t:'Logic',text:'必要なときだけ'},
+    {t:'Adventure',text:'気分で変わる'},
+    {t:'Intuition',text:'深夜の長電話'}]},
+
+  {q:"1人の時間は？",choices:[
+    {t:'Logic',text:'必要'},
+    {t:'Intuition',text:'すごく必要'},
+    {t:'Affection',text:'ほぼ不要'},
+    {t:'Adventure',text:'気分次第'}]},
+
+  {q:"恋人のためにできることは？",choices:[
+    {t:'Adventure',text:'冒険にもついていく'},
+    {t:'Affection',text:'全力で尽くす'},
+    {t:'Logic',text:'現実的な支え方をする'},
+    {t:'Change',text:'自分を変える努力をする'}]},
+
+  {q:"恋が冷める瞬間は？",choices:[
+    {t:'Adventure',text:'つまらないと感じた時'},
+    {t:'Intuition',text:'違和感を覚えた時'},
+    {t:'Affection',text:'冷たくされた時'},
+    {t:'Logic',text:'信頼できない時'}]}
+];
+
+/* ========= UI生成 ========= */
+const quizEl = document.getElementById('quiz');
+function renderQuiz(){
+  quizEl.innerHTML = '';
+  questions.forEach((q,qi)=>{
+    const qEl = document.createElement('div');
+    qEl.className='question';
+    qEl.innerHTML=`<div class="q-title">Q${qi+1}. ${q.q}</div>`;
+
+    const choicesEl = document.createElement('div');
+    choicesEl.className='choices';
+
+    q.choices.forEach((c,ci)=>{
+      const id = `q${qi}_c${ci}`;
+      const btn = document.createElement('label');
+      btn.className='choice';
+      btn.innerHTML=`<input type="radio" name="q${qi}" value="${c.t}" id="${id}"> ${c.text}`;
+      choicesEl.appendChild(btn);
+    });
+
+    qEl.appendChild(choicesEl);
+    quizEl.appendChild(qEl);
+  });
+}
+renderQuiz();
+
+/* ========= 判定（重みなし・少しだけ揺らぎ） ========= */
+function computeResult(answers){
+  const score={Adventure:0,Intuition:0,Affection:0,Logic:0,Change:0};
+  answers.forEach(a=>{ if(score[a] != null) score[a]++; });
+
+  const maxVal = Math.max(...Object.values(score));
+  const topAttrs = Object.keys(score).filter(k => score[k] === maxVal);
+
+  let chosenAttr;
+  if(topAttrs.length === 1){
+    chosenAttr = topAttrs[0];
+  } else {
+    const s = answers.join('');
+    let sum = 0;
+    for(let i=0;i<s.length;i++) sum += s.charCodeAt(i);
+    chosenAttr = topAttrs[sum % topAttrs.length];
+  }
+
+  // 2位属性を取得して、差が小さい場合は候補に含める
+  const sortedAttrs = Object.entries(score)
+    .sort((a,b)=>b[1]-a[1])
+    .map(e=>e[0]);
+  const secondAttr = sortedAttrs[1];
+  const diff = score[chosenAttr] - score[secondAttr];
+
+  let candidateAttrs = [chosenAttr];
+  if(diff <= 1 && score[secondAttr] > 0){
+    candidateAttrs.push(secondAttr);
+  }
+
+  let candidateAnimals = [];
+  candidateAttrs.forEach(attr=>{
+    candidateAnimals = candidateAnimals.concat(groups[attr]);
+  });
+
+  let idxSum = 0;
+  answers.forEach((a,i)=>{
+    const q = questions[i];
+    const idx = q.choices.findIndex(c=>c.t===a);
+    idxSum += (idx>=0?idx:0);
+  });
+
+  const pickIndex = idxSum % candidateAnimals.length;
+  return candidateAnimals[pickIndex];
+}
+
+/* ========= 結果表示（画面切り替え） ========= */
+const quizView   = document.getElementById('quizView');
+const resultView = document.getElementById('resultView');
+
+const cardImage   = document.getElementById('cardImage');
+const cardTitle   = document.getElementById('cardTitle');
+const cardSubtitle= document.getElementById('cardSubtitle');
+const cardDesc    = document.getElementById('cardDesc');
+const goodReason  = document.getElementById('goodReason');
+const badReason   = document.getElementById('badReason');
+
+function showResult(animal){
+  cardImage.src = animal.img;
+  cardTitle.textContent = `${animal.name} — ${animal.tarot}`;
+  cardSubtitle.textContent = `タイプ：${animal.group}`;
+  cardDesc.innerHTML = `<strong>性格：</strong>${animal.desc}<br><br><strong>恋愛アドバイス：</strong>${animal.advice}`;
+
+  const comp = compatibility[animal.group];
+  const goodGroup = comp.good[0];
+  const badGroup  = comp.bad[0];
+
+  goodReason.innerHTML =
+    `<strong>相性の良いタイプ：</strong><br>${generateCompatibilityReason(animal.group, goodGroup, true)}`;
+  badReason.innerHTML  =
+    `<strong>相性の悪いタイプ：</strong><br>${generateCompatibilityReason(animal.group, badGroup, false)}`;
+
+  quizView.style.display   = 'none';
+  resultView.style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ========= イベント ========= */
+const btnSubmit   = document.getElementById('btnSubmit');
+const btnReset    = document.getElementById('btnReset');
+const btnAgain    = document.getElementById('btnAgain');
+const btnDownload = document.getElementById('btnDownload');
+
+btnSubmit.addEventListener('click',()=>{
+  let answers=[];
+  for(let i=0;i<questions.length;i++){
+    const v=document.querySelector(`input[name="q${i}"]:checked`);
+    if(!v){alert('すべての質問に答えてください');return;}
+    answers.push(v.value);
+  }
+  const res=computeResult(answers);
+  showResult(res);
+});
+
+btnReset.addEventListener('click',()=>{
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+btnAgain.addEventListener('click',()=>{
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  resultView.style.display='none';
+  quizView.style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* 画像ダウンロード（カード画像だけ） */
+btnDownload.addEventListener('click',()=>{
+  const a = document.createElement('a');
+  a.href = cardImage.src;
+  a.download = 'tarot_result.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
+</script>
+</body>
+</html>
